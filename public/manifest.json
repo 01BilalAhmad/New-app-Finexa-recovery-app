@@ -1,0 +1,17 @@
+{
+  "name": "Al-Falah Order Booker",
+  "short_name": "AF Order Booker",
+  "description": "A field sales companion for wholesale order bookers",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f0fdf4",
+  "theme_color": "#16a34a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2316a34a'/><text x='50' y='65' font-size='45' font-weight='bold' text-anchor='middle' fill='white'>AF</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

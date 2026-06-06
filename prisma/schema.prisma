@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  username   String   @unique
+  email     String   @unique
+  phone     String   @default("")
+  password  String
+  role      String   @default("user")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  shops     Shop[]
+  transactions Transaction[]
+  shopNotes      ShopNote[]
+  shopVisits     ShopVisit[]
+  dailyTargets   DailyTarget[]
+  userCompanies  UserCompany[]
+  routeSessions  RouteSession[]
+}
+
+model Shop {
+  id            String   @id @default(cuid())
+  name          String
+  ownerName     String   @default("")
+  phone         String   @default("")
+  area          String   @default("")
+  address       String   @default("")
+  balance       Float    @default(0)
+  creditLimit   Float    @default(0)
+  latitude      Float    @default(31.5204)
+  longitude     Float    @default(74.3587)
+  routeDay      String   @default("monday")
+  orderbookerId String
+  orderbooker   User     @relation(fields: [orderbookerId], references: [id])
+  visited       Boolean  @default(false)
+  lastVisitDate String   @default("")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  transactions  Transaction[]
+  companyBalances ShopCompanyBalance[]
+  notes           ShopNote[]
+  visits          ShopVisit[]
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  shopId      String
+  shop        Shop     @relation(fields: [shopId], references: [id])
+  type        String   @default("recovery")
+  amount      Float
+  createdBy   String
+  orderbooker User     @relation(fields: [createdBy], references: [id])
+  description String   @default("")
+  date        String
+  gpsLat      Float?
+  gpsLng      Float?
+  gpsAddress  String?
+  approved    Boolean  @default(false)
+  companyId   String?
+  company     Company? @relation(fields: [companyId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Company {
+  id        String   @id @default(cuid())
+  name      String
+  shortName String   @default("")
+  color     String   @default("#16a34a")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  shopBalances    ShopCompanyBalance[]
+  userCompanies   UserCompany[]
+  transactions    Transaction[]
+}
+
+model ShopCompanyBalance {
+  id        String   @id @default(cuid())
+  shopId    String
+  companyId String
+  balance   Float    @default(0)
+  shop      Shop     @relation(fields: [shopId], references: [id])
+  company   Company  @relation(fields: [companyId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([shopId, companyId])
+}
+
+model UserCompany {
+  id        String   @id @default(cuid())
+  userId    String
+  companyId String
+  isPrimary Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id])
+  company   Company  @relation(fields: [companyId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, companyId])
+}
+
+model ShopNote {
+  id        String   @id @default(cuid())
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id])
+  text      String
+  createdBy String
+  creator   User     @relation(fields: [createdBy], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model ShopVisit {
+  id        String   @id @default(cuid())
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  gpsLat    Float?
+  gpsLng    Float?
+  gpsAddress String?
+  visitDate String
+  createdAt DateTime @default(now())
+}
+
+model DailyTarget {
+  id            String   @id @default(cuid())
+  orderbookerId String
+  orderbooker   User     @relation(fields: [orderbookerId], references: [id])
+  target        Float
+  month         String   // e.g. "2025-01"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([orderbookerId, month])
+}
+
+model RouteSession {
+  id            String   @id @default(cuid())
+  orderbookerId String
+  orderbooker   User     @relation(fields: [orderbookerId], references: [id])
+  startTime     DateTime @default(now())
+  endTime       DateTime?
+  date          String
+  totalDistance  Float    @default(0)   // in meters
+  totalShops    Int      @default(0)
+  shopsVisited  Int      @default(0)
+  status        String   @default("active")  // active | completed
+  waypoints     LocationWaypoint[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model LocationWaypoint {
+  id             String   @id @default(cuid())
+  routeSessionId String
+  routeSession   RouteSession @relation(fields: [routeSessionId], references: [id])
+  latitude       Float
+  longitude      Float
+  accuracy       Float?
+  speed          Float?
+  timestamp      DateTime @default(now())
+  type           String   @default("gps")  // gps | shop_arrive | shop_leave | route_point
+  shopId         String?
+  stayDuration   Int?     // in seconds — only for shop_leave type
+  synced         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+}
