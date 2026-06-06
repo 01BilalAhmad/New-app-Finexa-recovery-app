@@ -6,7 +6,7 @@ import {
   Search, RefreshCw, Wifi, WifiOff, Check, AlertTriangle, Navigation,
   FileText, ArrowLeft, Plus, X, ChevronRight, IndianRupee, Send,
   MessageSquare, Share2, Download, Edit3, Trash2, LogOut, Camera,
-  Map, BarChart3, PieChart as PieChartIcon, Home, Store, Calendar,
+  Map as MapIcon, BarChart3, PieChart as PieChartIcon, Home, Store, Calendar,
   MapPinned, Route, ClipboardList, Image as ImageIcon, Shield, StickyNote,
   Target, Clock, TrendingUp, Building2, AlertCircle
 } from 'lucide-react';
